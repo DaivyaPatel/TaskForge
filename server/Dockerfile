@@ -2,7 +2,7 @@
 # STAGE 1: Builder
 # ==========================================
 FROM node:20-alpine AS builder
-
+RUN apk add --no-cache openssl
 WORKDIR /app
 
 # Install all dependencies (including devDependencies needed for build)
@@ -21,7 +21,7 @@ COPY . .
 # STAGE 2: Runner (Production Image)
 # ==========================================
 FROM node:20-alpine AS runner
-
+RUN apk add --no-cache openssl
 WORKDIR /app
 
 # Set node environment to production
