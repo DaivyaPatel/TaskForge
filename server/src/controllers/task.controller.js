@@ -7,7 +7,8 @@ import NodeClam from 'clamscan';
 import { v2 as cloudinary } from 'cloudinary';
 import streamifier from 'streamifier';
 import { Readable } from 'stream';
-import { rrulestr } from 'rrule'; // <-- Added RRULE for parsing recurrences
+import rrulePkg from 'rrule';
+const { rrulestr } = rrulePkg;
 
 const prisma = new PrismaClient();
 
