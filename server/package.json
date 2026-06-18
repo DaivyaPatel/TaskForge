@@ -1,0 +1,46 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "@socket.io/redis-adapter": "^8.3.0",
+    "axios": "^1.17.0",
+    "bcrypt": "^6.0.0",
+    "bullmq": "^5.78.0",
+    "cheerio": "^1.2.0",
+    "clamscan": "^2.4.0",
+    "cloudinary": "^2.10.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.5.2",
+    "file-type": "^22.0.1",
+    "ioredis": "^5.11.1",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.2.0",
+    "qrcode": "^1.5.4",
+    "rate-limit-redis": "^5.0.0",
+    "redis": "^6.0.0",
+    "rrule": "^2.8.1",
+    "socket.io": "^4.8.3",
+    "speakeasy": "^2.0.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14",
+    "prisma": "^5.22.0",
+    "tsx": "^4.22.4"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.js"
+  }
+}

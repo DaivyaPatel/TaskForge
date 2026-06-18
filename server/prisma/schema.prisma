@@ -1,0 +1,201 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String    @id @default(cuid())
+  email               String    @unique
+  passwordHash        String
+  displayName         String
+  avatarUrl           String?
+  emailVerified       Boolean   @default(false)
+
+  verificationToken   String?   @unique
+  verificationExpires DateTime?
+
+  resetToken          String?   @unique
+  resetExpires        DateTime?
+
+  // --- 2FA Fields ---
+  totpEnabled         Boolean   @default(false)
+  totpSecret          String?   // Will store the AES-256-GCM encrypted secret
+  backupCodes         String[]  // Array of bcrypt-hashed backup codes
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  // Consolidated relations
+  workspaces          WorkspaceMember[]
+  tasks               Task[]         @relation("AssignedTo")
+  sessions            Session[]
+  notifications       Notification[]
+  createdTasks        Task[]         @relation("CreatedBy")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique        // refresh token hash
+  userAgent String?
+  ipAddress String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// --- MERGED WORKSPACE ---
+model Workspace {
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  color        String?  // hex accent color per workspace
+  logoUrl      String?  
+  logoPublicId String?  // Stores the Cloudinary ID for easy deletion later
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  members      WorkspaceMember[]
+  sections     Section[]
+}
+
+// --- MERGED WORKSPACE MEMBER ---
+model WorkspaceMember {
+  id          String   @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        Role     @default(VIEWER) 
+  joinedAt    DateTime @default(now())
+  
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+}
+
+// --- MERGED ROLE ENUM ---
+enum Role {
+  OWNER
+  EDITOR
+  VIEWER
+  MEMBER
+}
+
+model Section {
+  id          String   @id @default(cuid())
+  workspaceId String
+  parentId    String?  // null = top-level
+  title       String
+  color       String?
+  collapsed   Boolean  @default(false)
+  order       Float    // fractional indexing for reorder without full rewrite
+  depth       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  parent    Section?  @relation("SectionChildren", fields: [parentId], references: [id])
+  children  Section[] @relation("SectionChildren")
+  tasks     Task[]
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  sectionId   String
+  title       String
+  body        Json?      // Tiptap JSON document
+  status      TaskStatus @default(TODO)
+  priority    Priority   @default(MEDIUM)
+  dueDate     DateTime?
+  reminderAt  DateTime?
+  tags        String[]   // postgres text array
+  order       Float      // fractional indexing
+  isArchived  Boolean    @default(false)
+  isRecurring Boolean    @default(false)
+  recurRule   String?    // iCal RRULE string
+  assigneeId  String?
+  createdById String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  section     Section     @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  assignee    User?       @relation("AssignedTo", fields: [assigneeId], references: [id])
+  createdBy   User        @relation("CreatedBy", fields: [createdById], references: [id])
+  attachments Attachment[]
+  linksTo     TaskLink[]  @relation("SourceTask")
+  linkedFrom  TaskLink[]  @relation("TargetTask")
+  notifications Notification[]
+
+  @@index([tags]) // GIN index for text array search
+  @@index([status, priority, dueDate]) // Composite B-Tree index
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  BLOCKED
+  DONE
+}
+
+enum Priority {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+model Attachment {
+  id         String         @id @default(cuid())
+  taskId     String
+  type       AttachmentType
+  url        String         // CDN URL or external URL
+  filename   String?
+  mimeType   String?
+  sizeBytes  Int?
+  metadata   Json?          // link preview: title, favicon, description, thumbnail
+  order      Int            @default(0)
+  createdAt  DateTime       @default(now())
+  task       Task           @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+enum AttachmentType {
+  IMAGE
+  VIDEO
+  AUDIO
+  FILE
+  LINK
+  EMBED
+}
+
+model TaskLink {
+  id       String @id @default(cuid())
+  sourceId String // task that contains the link
+  targetId String // task being linked to
+  source   Task   @relation("SourceTask", fields: [sourceId], references: [id], onDelete: Cascade)
+  target   Task   @relation("TargetTask", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceId, targetId])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  taskId    String?
+  type      NotificationType
+  message   String
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task      Task?            @relation(fields: [taskId], references: [id], onDelete: SetNull)
+}
+
+enum NotificationType {
+  TASK_ASSIGNED
+  COMMENT_ADDED
+  DUE_DATE_REMINDER
+  WORKSPACE_INVITE
+}
