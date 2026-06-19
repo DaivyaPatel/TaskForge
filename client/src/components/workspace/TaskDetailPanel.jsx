@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDropzone } from 'react-dropzone';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { X, Calendar, Tag as TagIcon, CheckCircle2, Circle, Loader2, ChevronRight, Paperclip, UploadCloud, Repeat } from 'lucide-react';
+import { Paperclip, UploadCloud, Repeat } from 'lucide-react';
 import apiClient from '../../api/client';
 import { RichTextEditor } from './RichTextEditor';
 import { AttachmentItem } from './AttachmentItem';
