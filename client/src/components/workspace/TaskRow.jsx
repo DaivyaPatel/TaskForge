@@ -141,21 +141,6 @@ export const TaskRow = ({ task, onUpdate, onClick }) => {
       </div>
 
       {/* 4. Hover Context Menu (⋯) */}
-      <button 
-        className="opacity-0 group-hover:opacity-100 p-1 ml-2 hover:bg-slate-200 rounded text-slate-400 hover:text-slate-700 transition-all flex-shrink-0"
-        onClick={(e) => {
-          e.stopPropagation(); // Don't trigger the row click
-          // Add context menu logic here later
-        }}
-      >
-        <MoreHorizontal className="w-4 h-4" />
-      </button>
-      
-    </div>
-  );
-};
-
-{/* 4. Hover Context Menu (⋯) */}
       <div className="relative">
         <button 
           className="opacity-0 group-hover:opacity-100 p-1 ml-2 hover:bg-slate-200 rounded text-slate-400 hover:text-slate-700 transition-all flex-shrink-0"
@@ -185,3 +170,7 @@ export const TaskRow = ({ task, onUpdate, onClick }) => {
           </button>
         </div>
       </div>
+      
+    </div>
+  );
+};
