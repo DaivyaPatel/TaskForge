@@ -10,7 +10,7 @@ import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
 import { WorkspaceView } from './pages/WorkspaceView';
 import { SmartView } from './pages/SmartView';
-import { Settings } from './pages/Settings'; // <-- Imported Settings Page
+import { Settings } from './pages/Settings'; 
 import { AppLayout } from './layouts/AppLayout';
 
 function App() {
@@ -38,7 +38,7 @@ function App() {
             <Route path="/w/:workspaceId" element={<WorkspaceView />} />
 
             {/* The Settings route */}
-            <Route path="/settings" element={<Settings />} /> {/* <-- Added Settings Route */}
+            <Route path="/settings" element={<Settings />} /> 
             
             {/* Redirect the root URL straight to the dashboard! */}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -46,8 +46,8 @@ function App() {
           </Route>
 
           {/* --- FALLBACK --- */}
-          {/* If they type a random URL, send them to login */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          {/* If they type a random URL, send them to REGISTER first */}
+          <Route path="*" element={<Navigate to="/register" replace />} />
 
         </Routes>
       </BrowserRouter>

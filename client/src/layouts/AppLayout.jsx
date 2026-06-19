@@ -4,6 +4,9 @@ import { WifiOff } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { useSocketStore } from '../store/socketStore';
+import { useKeyboard } from '../hooks/useKeyboard';
+import { NetworkIndicator } from '../components/NetworkIndicator';
+import { useSocket } from '../hooks/useSocket';
 
 export const AppLayout = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -42,7 +45,49 @@ export const AppLayout = () => {
           You are offline. Reconnecting...
         </div>
       )}
+
+    </div>
+  );
+};
+
+export const DashboardLayout = () => {
+  // Assuming you have state/functions for these somewhere in your component or Zustand store
+  const openSearch = () => console.log('Opening Search Modal...');
+  const openNewTask = () => console.log('Opening New Task Modal...');
+  const toggleStatus = () => console.log('Toggling selected task status...');
+  const closeEverything = () => console.log('Closing all modals/drawers...');
+  const showShortcutsMenu = () => console.log('Showing Cheat Sheet...');
+
+  // Wire up the hook!
+  useKeyboard({
+    'cmd+k': openSearch,
+    'n': openNewTask,
+    'space': toggleStatus,
+    'escape': closeEverything,
+    'arrowup': () => console.log('Navigating Up...'),
+    'arrowdown': () => console.log('Navigating Down...'),
+    'cmd+/': showShortcutsMenu,
+  });
+
+  return (
+    <div>
+       {/* Your dashboard UI */}
+    </div>
+  );
+};
+
+export const AppLayout = ({ children }) => {
+  const socket = useSocket(); // Or however you get your socket instance
+
+  return (
+    <div className="relative min-h-screen bg-slate-50">
+      {/* Network UI goes at the very top level */}
+      <NetworkIndicator socket={socket} />
       
+      {/* The rest of your app (Sidebar, TopBar, Main Content) */}
+      <div className="flex">
+        {/* ... */}
+      </div>
     </div>
   );
 };

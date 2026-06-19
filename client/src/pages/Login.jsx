@@ -1,24 +1,34 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
+// Import your auth store (adjust the path if yours is named differently)
+import { useAuthStore } from '../store/useAuthStore'; 
 
 export const Login = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Grab the actual login function from your Zustand store
+  const login = useAuthStore((state) => state.login);
   
   const { register, handleSubmit, formState: { isSubmitting } } = useForm();
+
+  // Figure out where to send them after logging in (defaults to dashboard)
+  const from = location.state?.from?.pathname || '/dashboard';
 
   const onSubmit = async (data) => {
     setError(null);
     try {
-      // NOTE: You will plug your actual auth login logic here later!
-      console.log("Logging in with:", data);
+      // Call your actual backend via the Zustand store
+      await login(data.email, data.password);
       
-      // Simulating a successful login redirect for now
-      navigate('/w/test-123'); 
+      // Send them to the page they were trying to visit, or the dashboard
+      navigate(from, { replace: true }); 
     } catch (err) {
-      setError("Failed to log in. Please check your credentials.");
+      // Show a clean error to the user if they type the wrong password
+      setError(err.response?.data?.message || "Failed to log in. Please check your credentials.");
     }
   };
 
@@ -69,6 +79,14 @@ export const Login = () => {
             {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Log In"}
           </button>
         </form>
+
+        {/* Link back to Register */}
+        <div className="mt-6 text-center text-sm text-slate-500">
+          Don't have an account?{' '}
+          <Link to="/register" className="text-blue-600 hover:text-blue-700 font-medium">
+            Sign up
+          </Link>
+        </div>
 
       </div>
     </div>
