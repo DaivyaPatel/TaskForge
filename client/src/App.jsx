@@ -5,6 +5,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
+import { Signup } from './pages/Signup';
 import { VerifyEmail } from './pages/VerifyEmail';
 import { Dashboard } from './pages/Dashboard';
 import { WorkspaceView } from './pages/WorkspaceView';
@@ -18,7 +19,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Register />} />
+          <Route path="/signup" element={<Signup />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify-email/:token" element={<VerifyEmail />} />
 
