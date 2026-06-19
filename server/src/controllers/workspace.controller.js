@@ -239,3 +239,12 @@ export const getWorkspaceTags = async (req, res) => {
 
   res.status(200).json(uniqueTags);
 };
+
+export const getArchivedTasks = async (req, res) => {
+  // Safe placeholder so the server boots up. 
+  // We can add the real database logic for this later!
+  res.status(200).json({ 
+    message: "Archive feature coming soon", 
+    tasks: [] 
+  });
+};
