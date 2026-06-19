@@ -23,7 +23,7 @@ const signupSchema = z.object({
 });
 
 export const Auth = () => {
-  const [mode, setMode] = useState('login'); // 'login' or 'signup'
+  const [mode, setMode] = useState('signup'); // 'login' or 'signup'
   const [error, setError] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
