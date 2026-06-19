@@ -31,7 +31,7 @@ function App() {
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
           </Route>
 
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<Navigate to="/signup" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
