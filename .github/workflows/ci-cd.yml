@@ -20,30 +20,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: '**/package-lock.json'
 
-      - name: Install Client Dependencies
-        working-directory: ./client
-        run: npm ci
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
 
-      - name: Install Server Dependencies
-        working-directory: ./server
-        run: npm ci
+      - name: Install Dependencies
+        run: pnpm install
 
       - name: Lint Client (ESLint)
         working-directory: ./client
-        run: npm run lint
+        run: pnpm run lint
 
       - name: Lint Server (ESLint)
         working-directory: ./server
-        run: npm run lint
-
-      # Ensure you have a "test" script in your server/package.json!
-      # If you don't have tests yet, you can comment this step out for now.
-      - name: Test Server (Jest)
-        working-directory: ./server
-        run: npm test
+        run: pnpm run lint
 
   # ==========================================
   # STAGE 2: Build Verification
@@ -60,11 +52,14 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
       - name: Build Frontend (Vite)
         working-directory: ./client
-        run: |
-          npm ci
-          npm run build
+        run: pnpm run build
 
       - name: Build Backend (Docker)
         working-directory: ./server
@@ -86,7 +81,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
 
       - name: Deploy Frontend to Vercel
         working-directory: ./client
@@ -95,7 +95,7 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
-          npm install -g vercel
+          pnpm install -g vercel
           vercel pull --yes --environment=production --token=$VERCEL_TOKEN
           vercel build --prod --token=$VERCEL_TOKEN
           vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
