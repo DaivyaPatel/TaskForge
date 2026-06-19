@@ -118,8 +118,6 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-export default apiClient;
-
 // Add these to your API service file
 export const linkTasks = (sourceId, targetId) => 
   apiClient.post(`/tasks/${sourceId}/links`, { targetId });
