@@ -1,27 +1,37 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@keyframes depth-rail {
-  0% { transform: translateZ(-500px) translateY(100px) rotateX(45deg); opacity: 0; }
-  100% { transform: translateZ(0) translateY(0) rotateX(45deg); opacity: 1; }
-}
+@layer base {
+  :root {
+    /* Set your brand accent color here (defaults to blue-600) */
+    --accent: #2563eb; 
+  }
 
-@keyframes rail-scroll {
-  0% { background-position: 0 0; }
-  100% { background-position: 0 1000px; }
-}
+  /* 1. Prevent horizontal scroll at all breakpoints */
+  html, body {
+    overflow-x: hidden;
+    width: 100%;
+    -webkit-font-smoothing: antialiased;
+  }
 
-.depth-rail-bg {
-  perspective: 1000px;
-  background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
-}
+  /* 2. Global Keyboard Focus Styles */
+  *:focus:not(:focus-visible) {
+    outline: none;
+  }
 
-.depth-rail-grid {
-  position: absolute;
-  inset: -100%;
-  background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.05) 2px, transparent 2px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 2px, transparent 2px);
-  background-size: 50px 50px;
-  transform: rotateX(45deg);
-  animation: rail-scroll 20s linear infinite;
+  *:focus-visible {
+    outline: 2px solid var(--accent) !important;
+    outline-offset: 2px !important;
+  }
+
+  /* 3. Accessibility: Prefers Reduced Motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }

@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { useSocketStore } from '../store/socketStore';
+import { useToastStore } from '../store/useToastStore';
 
 // 1. Create the base Axios instance
 const apiClient = axios.create({
-  baseURL: '/api/v1', // We will set up a proxy in Vite later so this points to your backend
+  baseURL: import.meta.env.VITE_API_URL || '/api/v1',
   withCredentials: true, // CRITICAL: This tells Axios to send your HTTP-only refresh cookie
   headers: {
     'Content-Type': 'application/json',
@@ -19,12 +20,20 @@ export const setAccessToken = (token) => {
 
 export const getAccessToken = () => accessToken;
 
-// 3. Request Interceptor: Attach the token to every outgoing request
+// 3. SINGLE Request Interceptor: Attach Token & Socket ID
 apiClient.interceptors.request.use(
   (config) => {
+    // Attach JWT if we have it
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
+    
+    // Attach Socket ID to prevent the server from echoing events back to the sender
+    const socket = useSocketStore.getState().socket;
+    if (socket && socket.id) {
+      config.headers['x-socket-id'] = socket.id;
+    }
+    
     return config;
   },
   (error) => Promise.reject(error)
@@ -45,63 +54,68 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-// 4. Response Interceptor: The "Tripwire" for 401 Errors
+// 4. Response Interceptor: The Tripwire for 401s & Global Errors
 apiClient.interceptors.response.use(
-  (response) => response, // If the request succeeds, just return it
+  (response) => response, // If the request succeeds, pass it through
   async (error) => {
     const originalRequest = error.config;
 
-    // Check if the error is a 401, and ensure we haven't already retried this exact request
+    // --- SCENARIO A: Token Expired (401) ---
     if (error.response?.status === 401 && !originalRequest._retry) {
       
-      // Prevent infinite loops: Don't intercept if the refresh route or login route itself failed
+      // Prevent infinite loops on auth routes
       if (originalRequest.url.includes('/auth/refresh-token') || originalRequest.url.includes('/auth/login')) {
         return Promise.reject(error);
       }
 
-      // If a refresh is already happening, queue this request up and wait
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
           .then((token) => {
             originalRequest.headers.Authorization = `Bearer ${token}`;
-            return apiClient(originalRequest); // Retry with the new token
+            return apiClient(originalRequest);
           })
           .catch((err) => Promise.reject(err));
       }
 
-      // Start the refresh process
       originalRequest._retry = true;
       isRefreshing = true;
 
       try {
-        // Ask the backend for a new token (Axios automatically sends the cookie)
         const { data } = await axios.post('/api/v1/auth/refresh-token', {}, { 
-          baseURL: '/api/v1',
+          baseURL: import.meta.env.VITE_API_URL || '/api/v1',
           withCredentials: true 
         });
         
         setAccessToken(data.accessToken);
-        
-        // Let the queued requests know we have a new token
         processQueue(null, data.accessToken);
         
-        // Retry the original request that triggered this whole process
         originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
         return apiClient(originalRequest);
         
       } catch (refreshError) {
-        // If the refresh fails (cookie expired, revoked, or stolen), clear everything
         processQueue(refreshError, null);
         setAccessToken(null);
         
-        // Force the user back to the login page to re-authenticate
+        // Notify the user before kicking them out
+        useToastStore.getState().addToast({ 
+          type: 'warning', 
+          message: 'Your session expired. Please log in again.' 
+        });
+        
         window.location.href = '/login'; 
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
       }
+    }
+
+    // --- SCENARIO B: Standard Errors (400, 403, 500, Network Drop) ---
+    // We avoid toasting for 401s here because Scenario A is actively trying to fix them
+    if (error.response?.status !== 401) {
+      const message = error.response?.data?.message || 'An unexpected network error occurred.';
+      useToastStore.getState().addToast({ type: 'error', message });
     }
 
     return Promise.reject(error);
@@ -110,18 +124,9 @@ apiClient.interceptors.response.use(
 
 export default apiClient;
 
-apiClient.interceptors.request.use((config) => {
-  const socket = useSocketStore.getState().socket;
-  if (socket && socket.id) {
-    config.headers['x-socket-id'] = socket.id;
-  }
-  return config;
-});
-
-// Add these to your API service file
+// --- SPECIFIC API SERVICES ---
 export const linkTasks = (sourceId, targetId) => 
   apiClient.post(`/tasks/${sourceId}/links`, { targetId });
 
 export const getTaskLinks = (taskId) => 
   apiClient.get(`/tasks/${taskId}/links`);
-

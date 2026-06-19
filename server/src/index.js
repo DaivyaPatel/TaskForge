@@ -21,9 +21,32 @@ import './jobs/reminderWorker.js';
 import { apiLimiter } from './middleware/rateLimiter.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { initSocket } from './utils/socket.js';
+import helmet from 'helmet'; // <-- 1. Add this import at the very top
+
 
 const app = express();
 const httpServer = createServer(app);
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"], 
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", process.env.CLIENT_URL || "http://localhost:5173"], 
+    },
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true,
+  },
+  frameguard: { action: 'deny' },
+  noSniff: true,
+  xssFilter: true,
+  referrerPolicy: { policy: 'strict-origin' },
+}));
 
 app.use(cors({
   origin: env.CLIENT_ORIGIN,
