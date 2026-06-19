@@ -8,7 +8,7 @@ import {
   getWorkspaces, createWorkspace, getWorkspaceById, 
   updateWorkspace, deleteWorkspace,
   inviteMember, updateMemberRole, removeMember,
-  getWorkspaceTags
+  getWorkspaceTags, getArchivedTasks
 } from '../controllers/workspace.controller.js';
 import sectionRoutes from './section.routes.js'; 
 

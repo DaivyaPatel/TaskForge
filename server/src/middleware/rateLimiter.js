@@ -13,6 +13,7 @@ const createLimiter = (windowMs, max, keyGenerator) => {
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
     keyGenerator, // Optional custom key (like email or user ID)
+    validate: { ip: false }, // <-- Added this to bypass strict IPv6 validation
     handler: (req, res, next, options) => {
       // Return 429 status with the requested JSON format
       res.status(options.statusCode).json({ 
@@ -20,6 +21,7 @@ const createLimiter = (windowMs, max, keyGenerator) => {
         retryAfter: Math.ceil(options.windowMs / 1000)
       });
     }
+    
   });
 };
 
