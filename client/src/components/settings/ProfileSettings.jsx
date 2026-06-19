@@ -102,7 +102,7 @@ export const ProfileSettings = () => {
     try {
       await apiClient.delete('/users/me', { data: { password: deletePassword } });
       setUser(null);
-      window.location.href = '/register'; // Redirect completely out
+      window.location.href = '/login';
     } catch (err) {
       alert(err.response?.data?.error || 'Failed to delete account. Check your password.');
       setIsDeleting(false);

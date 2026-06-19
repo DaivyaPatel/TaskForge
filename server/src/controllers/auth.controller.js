@@ -183,7 +183,7 @@ export const login = async (req, res) => {
     res.cookie('refreshToken', rawRefreshToken, {
       httpOnly: true,
       secure: env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
       path: '/api/v1/auth',
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
