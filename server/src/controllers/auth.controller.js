@@ -212,22 +212,9 @@ export const refreshToken = async (req, res) => {
       return res.status(401).json({ error: "No refresh token provided" });
     }
 
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: "Missing expired access token" });
-    }
-
-    const expiredToken = authHeader.split(' ')[1];
-    const decoded = jwt.decode(expiredToken); 
-    
-    if (!decoded || !decoded.sub) {
-      return res.status(401).json({ error: "Invalid access token" });
-    }
-    const userId = decoded.sub;
-
-    const sessions = await prisma.session.findMany({ where: { userId } });
-
+    const sessions = await prisma.session.findMany();
     let currentSession = null;
+
     for (const session of sessions) {
       const isValid = await bcrypt.compare(rawToken, session.token);
       if (isValid) {
@@ -237,8 +224,7 @@ export const refreshToken = async (req, res) => {
     }
 
     if (!currentSession) {
-      await prisma.session.deleteMany({ where: { userId } });
-      return res.status(401).json({ error: "Token reuse detected. All sessions revoked." });
+      return res.status(401).json({ error: "Invalid refresh token" });
     }
 
     if (new Date() > currentSession.expiresAt) {
@@ -246,23 +232,32 @@ export const refreshToken = async (req, res) => {
       return res.status(401).json({ error: "Session expired. Please log in again." });
     }
 
+    const user = await prisma.user.findUnique({
+      where: { id: currentSession.userId }
+    });
+
+    if (!user) {
+      await prisma.session.delete({ where: { id: currentSession.id } });
+      return res.status(401).json({ error: "User not found" });
+    }
+
     await prisma.session.delete({ where: { id: currentSession.id } });
 
     const newAccessToken = jwt.sign(
-      { sub: userId, email: decoded.email },
+      { sub: user.id, email: user.email },
       env.JWT_SECRET,
       { expiresIn: '15m' }
     );
 
     const newRawRefreshToken = crypto.randomBytes(32).toString('hex');
     const newRefreshTokenHash = await bcrypt.hash(newRawRefreshToken, 12);
-    
+
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
 
     await prisma.session.create({
       data: {
-        userId,
+        userId: user.id,
         token: newRefreshTokenHash,
         userAgent: req.headers['user-agent'],
         ipAddress: req.ip,
@@ -273,13 +268,12 @@ export const refreshToken = async (req, res) => {
     res.cookie('refreshToken', newRawRefreshToken, {
       httpOnly: true,
       secure: env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
       path: '/api/v1/auth',
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
     res.status(200).json({ accessToken: newAccessToken });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
