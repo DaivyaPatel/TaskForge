@@ -127,4 +127,3 @@ export const linkTasks = (sourceId, targetId) =>
 export const getTaskLinks = (taskId) => 
   apiClient.get(`/tasks/${taskId}/links`);
 
-export const getTaskLinks = (taskId) => apiClient.get(`/tasks/${taskId}/links`);
