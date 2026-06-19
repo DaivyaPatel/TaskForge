@@ -1,10 +1,10 @@
 {
-  "buildCommand": "cd client && pnpm install && pnpm run build",
-  "outputDirectory": "client/dist",
   "rewrites": [
     {
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false
 }
