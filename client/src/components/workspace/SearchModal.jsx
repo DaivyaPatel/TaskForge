@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Search, Clock, CheckCircle2, ChevronRight, X, Command, Circle } from 'lucide-react';
+import { Search, Clock, CheckCircle2, ChevronRight, Command, Circle } from 'lucide-react';
 import apiClient from '../../api/client';
 
 export const SearchModal = () => {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bell, Check, CheckCircle2, Clock, UserPlus, FileText } from 'lucide-react';
+import { Bell, CheckCircle2, Clock, UserPlus, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../../api/client';
 import { useSocketEvent } from '../../hooks/useSocket';

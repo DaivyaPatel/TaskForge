@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { File, Download, GripVertical, Image as ImageIcon, Play, Pause, X } from 'lucide-react';
+import { File, Download, GripVertical, Play, Pause, X } from 'lucide-react';
 import WaveSurfer from 'wavesurfer.js';
 
 export const AttachmentItem = ({ attachment, onRemove }) => {

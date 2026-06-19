@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Users, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { Users, CheckCircle2, AlertCircle } from 'lucide-react';
 
 export const WorkspaceCard = ({ workspace }) => {
   // Use backend stats if they exist, otherwise default to 0 for the UI mockup

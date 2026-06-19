@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Filter, X, ChevronDown } from 'lucide-react';
+import { Filter, X } from 'lucide-react';
 import apiClient from '../../api/client';
 
 export const FilterBar = ({ workspaceId }) => {

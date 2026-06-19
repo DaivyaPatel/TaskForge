@@ -1,4 +1,4 @@
-import React from 'react';
+// Skeleton components for loading states
 
 // 1. The Base Skeleton Block (with the custom shimmer effect)
 export const SkeletonBase = ({ className }) => (
