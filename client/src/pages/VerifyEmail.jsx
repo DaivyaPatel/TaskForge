@@ -20,7 +20,7 @@ export const VerifyEmail = () => {
         } else {
           setStatus('error');
         }
-      } catch (err) {
+      } catch (_err) {
         setStatus('error');
       }
     };

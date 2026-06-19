@@ -17,6 +17,7 @@ export const SmartView = () => {
   const [selectedTaskId, setSelectedTaskId] = useState(null);
 
   // If the user types a bad URL like /smart/pizza, redirect them
+  // If the user types a bad URL like /smart/pizza, redirect them
   if (view !== 'today' && view !== 'upcoming') {
     return <Navigate to="/dashboard" replace />;
   }
@@ -29,8 +30,8 @@ export const SmartView = () => {
       try {
         const res = await apiClient.get(`/tasks/smart?view=${view}`);
         setTasks(res.data);
-      } catch (err) {
-        console.error(err);
+      } catch (_err) {
+        console.error(_err);
         setError("Failed to load tasks");
       } finally {
         setIsLoading(false);

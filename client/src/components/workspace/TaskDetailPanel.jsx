@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDropzone } from 'react-dropzone';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { Paperclip, UploadCloud, Repeat } from 'lucide-react';
+import { Paperclip, Repeat } from 'lucide-react';
 import apiClient from '../../api/client';
 import { RichTextEditor } from './RichTextEditor';
 import { AttachmentItem } from './AttachmentItem';
@@ -13,11 +13,9 @@ export const TaskDetailPanel = ({ taskId, onClose, onTaskUpdated }) => {
   const navigate = useNavigate();
   const [task, setTask] = useState(null);
   const [links, setLinks] = useState({ linksTo: [], linkedFrom: [] });
-  const [isLoading, setIsLoading] = useState(true);
   const [uploadProgress, setUploadProgress] = useState({});
   
   const [title, setTitle] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
   
   // Recurring Task State
   const [isRecurring, setIsRecurring] = useState(false);
@@ -37,7 +35,7 @@ export const TaskDetailPanel = ({ taskId, onClose, onTaskUpdated }) => {
         setIsRecurring(taskRes.data.isRecurring || false);
         setRecurRule(taskRes.data.recurRule || '');
         setLinks(linksRes.data);
-      } catch (error) {
+      } catch (_error) {
         console.error("Failed to load task details", error);
       } finally {
         setIsLoading(false);
