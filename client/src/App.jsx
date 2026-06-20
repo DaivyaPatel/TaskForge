@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './providers/AuthProvider';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
-import { Login } from './pages/Login';
+import { Auth } from './pages/Auth';
 import { VerifyEmail } from './pages/VerifyEmail';
 import { Dashboard } from './pages/Dashboard';
 import { WorkspaceView } from './pages/WorkspaceView';
@@ -16,9 +16,9 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Login />} />
-          <Route path="/register" element={<Login />} />
+          <Route path="/login" element={<Auth />} />
+          <Route path="/signup" element={<Auth />} />
+          <Route path="/register" element={<Auth />} />
           <Route path="/verify-email/:token" element={<VerifyEmail />} />
 
           <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>

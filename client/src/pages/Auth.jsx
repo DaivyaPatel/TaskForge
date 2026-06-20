@@ -10,9 +10,11 @@ const inputClassName =
 const submitButtonClassName =
   'w-full flex items-center justify-center py-2 px-4 bg-slate-900 text-white rounded-md hover:bg-slate-800 transition-colors disabled:opacity-70';
 
-export const Login = () => {
+export const Auth = () => {
   const location = useLocation();
-  const [isLogin, setIsLogin] = useState(() => location.pathname === '/login');
+  const [isLogin, setIsLogin] = useState(() => {
+    return location.pathname !== '/signup' && location.pathname !== '/register';
+  });
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(location.state?.message ?? null);
   const navigate = useNavigate();
@@ -25,7 +27,11 @@ export const Login = () => {
   const from = location.state?.from?.pathname || '/dashboard';
 
   const toggleMode = () => {
-    setIsLogin((prev) => !prev);
+    setIsLogin((prev) => {
+      const next = !prev;
+      navigate(next ? '/login' : '/signup', { replace: true });
+      return next;
+    });
     setError(null);
     setSuccessMessage(null);
     reset();
@@ -55,6 +61,7 @@ export const Login = () => {
       });
       reset();
       setIsLogin(true);
+      navigate('/login', { replace: true });
       setSuccessMessage(
         response.message || 'Account created successfully! Please check your email to verify your account.'
       );
@@ -160,7 +167,7 @@ export const Login = () => {
               <button
                 type="button"
                 onClick={toggleMode}
-                className="text-blue-600 hover:text-blue-700 font-medium"
+                className="text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
               >
                 Sign up
               </button>
@@ -171,7 +178,7 @@ export const Login = () => {
               <button
                 type="button"
                 onClick={toggleMode}
-                className="text-blue-600 hover:text-blue-700 font-medium"
+                className="text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
               >
                 Log in
               </button>
