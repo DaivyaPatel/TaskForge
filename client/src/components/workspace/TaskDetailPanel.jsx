@@ -24,7 +24,6 @@ export const TaskDetailPanel = ({ taskId, onClose, onTaskUpdated }) => {
   useEffect(() => {
     if (!taskId) return;
     const fetchData = async () => {
-      setIsLoading(true);
       try {
         const [taskRes, linksRes] = await Promise.all([
           apiClient.get(`/tasks/${taskId}`),
@@ -36,16 +35,13 @@ export const TaskDetailPanel = ({ taskId, onClose, onTaskUpdated }) => {
         setRecurRule(taskRes.data.recurRule || '');
         setLinks(linksRes.data);
       } catch (_error) {
-        console.error("Failed to load task details", error);
-      } finally {
-        setIsLoading(false);
+        console.error("Failed to load task details", _error);
       }
     };
     fetchData();
   }, [taskId, workspaceId]);
 
   const handleSave = async () => {
-    setIsSaving(true);
     try {
       await apiClient.put(`/tasks/${taskId}`, { 
         title, 
@@ -55,8 +51,6 @@ export const TaskDetailPanel = ({ taskId, onClose, onTaskUpdated }) => {
       if (onTaskUpdated) onTaskUpdated();
     } catch (error) {
       console.error("Failed to save task", error);
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -104,7 +98,7 @@ export const TaskDetailPanel = ({ taskId, onClose, onTaskUpdated }) => {
     setTask(prev => ({ ...prev, attachments: prev.attachments.filter(a => a.id !== attachmentId) }));
     try {
       await apiClient.delete(`/attachments/${attachmentId}`); 
-    } catch (error) {
+    } catch (_error) {
       setTask(prev => ({ ...prev, attachments: previousAttachments }));
     }
   };

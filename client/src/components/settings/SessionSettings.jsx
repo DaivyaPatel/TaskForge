@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Laptop, Smartphone, Globe, LogOut, ShieldAlert, AlertTriangle, Loader2 } from 'lucide-react';
 import apiClient from '../../api/client';
 import { useAuthStore } from '../../store/authStore'; // Adjust if your auth store path differs
@@ -28,6 +29,7 @@ const parseUserAgent = (ua) => {
 
 export const SessionSettings = () => {
   const { setUser } = useAuthStore();
+  const navigate = useNavigate();
   const [sessions, setSessions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -37,21 +39,21 @@ export const SessionSettings = () => {
   const [confirmRevokeAll, setConfirmRevokeAll] = useState(false);
 
   useEffect(() => {
+    const fetchSessions = async () => {
+      setIsLoading(true);
+      try {
+        const { data } = await apiClient.get('/sessions');
+        setSessions(data);
+      } catch (err) {
+        setError("Failed to load active sessions.");
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchSessions();
   }, []);
-
-  const fetchSessions = async () => {
-    setIsLoading(true);
-    try {
-      const { data } = await apiClient.get('/sessions');
-      setSessions(data);
-    } catch (err) {
-      setError("Failed to load active sessions.");
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleRevokeSession = async (sessionId, isCurrent) => {
     if (isCurrent && confirmingCurrent !== sessionId) {
@@ -64,14 +66,13 @@ export const SessionSettings = () => {
       await apiClient.delete(`/sessions/${sessionId}`);
       
       if (isCurrent) {
-        // If they revoked their current session, force them to log in again
-        setUser(null); 
-        window.location.href = '/login';
+        setUser(null);
+        navigate('/login', { replace: true });
       } else {
         setSessions(prev => prev.filter(s => s.id !== sessionId));
         setConfirmingCurrent(null);
       }
-    } catch (err) {
+    } catch (_err) {
       setError("Failed to revoke session.");
     } finally {
       setRevokingId(null);
@@ -88,8 +89,8 @@ export const SessionSettings = () => {
     try {
       await apiClient.delete('/sessions');
       setUser(null);
-      window.location.href = '/login';
-    } catch (err) {
+      navigate('/login', { replace: true });
+    } catch (_err) {
       setError("Failed to log out of all devices.");
       setIsLoading(false);
     }

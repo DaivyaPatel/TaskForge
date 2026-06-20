@@ -23,17 +23,17 @@ export const NotificationBell = () => {
 
   // Fetch initial notifications
   useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const { data } = await apiClient.get('/notifications');
+        setNotifications(data);
+      } catch (error) {
+        console.error("Failed to load notifications", error);
+      }
+    };
+
     fetchNotifications();
   }, []);
-
-  const fetchNotifications = async () => {
-    try {
-      const { data } = await apiClient.get('/notifications');
-      setNotifications(data);
-    } catch (error) {
-      console.error("Failed to load notifications", error);
-    }
-  };
 
   // Listen for real-time notifications
   useSocketEvent('notification:new', (newNotif) => {

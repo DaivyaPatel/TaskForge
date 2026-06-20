@@ -10,7 +10,7 @@ const decodeJWT = (token) => {
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
     return JSON.parse(jsonPayload);
-  } catch (e) {
+  } catch (_e) {
     return null;
   }
 };
@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
         const decoded = decodeJWT(token);
         setAuth({ id: decoded.sub, email: decoded.email }, token);
         
-      } catch (error) {
+      } catch (_error) {
         // If it fails (no cookie, or expired), just clear the store and load the app as a guest
         clearAuth();
       }

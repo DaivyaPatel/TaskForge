@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
@@ -16,10 +16,6 @@ export const Login = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(location.state?.message ?? null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    setIsLogin(location.pathname === '/login');
-  }, [location.pathname]);
 
   const login = useAuthStore((state) => state.login);
   const registerAccount = useAuthStore((state) => state.register);

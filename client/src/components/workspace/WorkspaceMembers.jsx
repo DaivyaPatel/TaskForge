@@ -21,14 +21,28 @@ export const WorkspaceMembers = () => {
   const [confirmRemove, setConfirmRemove] = useState(null);
 
   useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        const { data } = await apiClient.get(`/workspaces/${workspaceId}/members`);
+        setMembers(data);
+
+        const me = data.find(m => m.userId === user.id);
+        if (me) setCurrentUserRole(me.role);
+      } catch (error) {
+        console.error("Failed to fetch members", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchMembers();
-  }, [workspaceId]);
+  }, [workspaceId, user.id]);
 
   const fetchMembers = async () => {
     try {
       const { data } = await apiClient.get(`/workspaces/${workspaceId}/members`);
       setMembers(data);
-      
+
       const me = data.find(m => m.userId === user.id);
       if (me) setCurrentUserRole(me.role);
     } catch (error) {

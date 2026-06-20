@@ -25,36 +25,43 @@ export const SearchModal = () => {
   const inputRef = useRef(null);
   const resultsRef = useRef(null);
 
+  const hasSearchCriteria = query.trim() !== '' || Boolean(statusFilter) || Boolean(priorityFilter);
+  const displayedResults = hasSearchCriteria ? results : [];
+
+  const openSearchModal = () => {
+    setQuery('');
+    setResults([]);
+    setSelectedIndex(0);
+    setIsOpen(true);
+    setTimeout(() => inputRef.current?.focus(), 100);
+  };
+
+  const closeSearchModal = () => {
+    setIsOpen(false);
+  };
+
   // Toggle modal with Cmd+K / Ctrl+K
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        setIsOpen((prev) => !prev);
+        if (isOpen) {
+          closeSearchModal();
+        } else {
+          openSearchModal();
+        }
       }
-      if (e.key === 'Escape') setIsOpen(false);
+      if (e.key === 'Escape' && isOpen) {
+        closeSearchModal();
+      }
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  // Focus input when opened
-  useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 100);
-      setQuery('');
-      setResults([]);
-      setSelectedIndex(0);
-    }
   }, [isOpen]);
 
   // Debounced Search API Call
   useEffect(() => {
-    if (!isOpen) return;
-    if (query.trim() === '' && !statusFilter && !priorityFilter) {
-      setResults([]);
-      return;
-    }
+    if (!isOpen || !hasSearchCriteria) return;
 
     const fetchResults = async () => {
       setIsLoading(true);
@@ -75,13 +82,13 @@ export const SearchModal = () => {
 
     const debounceId = setTimeout(fetchResults, 300);
     return () => clearTimeout(debounceId);
-  }, [query, workspaceId, statusFilter, priorityFilter, isOpen]);
+  }, [query, workspaceId, statusFilter, priorityFilter, isOpen, hasSearchCriteria]);
 
   // Handle Keyboard Navigation (Up/Down/Enter)
   const handleKeyDown = (e) => {
-    if (!results.length && !recentSearches.length) return;
+    if (!displayedResults.length && !recentSearches.length) return;
 
-    const listToNavigate = query.trim() === '' && !results.length ? recentSearches : results;
+    const listToNavigate = query.trim() === '' && !displayedResults.length ? recentSearches : displayedResults;
 
     if (e.key === 'ArrowDown') {
       e.preventDefault();
@@ -92,7 +99,7 @@ export const SearchModal = () => {
     } else if (e.key === 'Enter') {
       e.preventDefault();
       if (listToNavigate[selectedIndex]) {
-        if (query.trim() === '' && !results.length) {
+        if (query.trim() === '' && !displayedResults.length) {
           // If entering on a recent search string, set it to query
           setQuery(listToNavigate[selectedIndex]);
         } else {
@@ -121,7 +128,7 @@ export const SearchModal = () => {
 
   const handleSelectTask = (task) => {
     if (query.trim()) saveRecentSearch(query.trim());
-    setIsOpen(false);
+    closeSearchModal();
     // Navigate to workspace and open task detail panel via query param
     navigate(`/w/${task.section.workspaceId}?task=${task.id}`);
   };
@@ -129,7 +136,7 @@ export const SearchModal = () => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-slate-900/50 backdrop-blur-sm flex items-start justify-center pt-[10vh] px-4" onClick={() => setIsOpen(false)}>
+    <div className="fixed inset-0 z-[100] bg-slate-900/50 backdrop-blur-sm flex items-start justify-center pt-[10vh] px-4" onClick={closeSearchModal}>
       <div 
         className="w-full max-w-2xl bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-200 flex flex-col"
         onClick={(e) => e.stopPropagation()}
@@ -182,8 +189,8 @@ export const SearchModal = () => {
           {isLoading && query ? (
             <div className="p-4 text-center text-sm text-slate-500">Searching...</div>
           ) : query.trim() || statusFilter || priorityFilter ? (
-            results.length > 0 ? (
-              results.map((task, index) => (
+            displayedResults.length > 0 ? (
+              displayedResults.map((task, index) => (
                 <div
                   key={task.id}
                   onMouseEnter={() => setSelectedIndex(index)}

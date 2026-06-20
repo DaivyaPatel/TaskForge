@@ -38,7 +38,7 @@ export const WorkspaceView = () => {
   const [viewMode, setViewMode] = useState('active'); // 'active' | 'archived'
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedTaskId, setSelectedTaskId] = useState(null);
+  const [clickedTaskId, setClickedTaskId] = useState(null);
   
   // Drag Tracking State
   const [activeTask, setActiveTask] = useState(null); 
@@ -57,14 +57,10 @@ export const WorkspaceView = () => {
 
   // --- SYNC URL PARAMS WITH TASK PANEL ---
   const taskIdParam = searchParams.get('task');
-  useEffect(() => {
-    if (taskIdParam) {
-      setSelectedTaskId(taskIdParam);
-    }
-  }, [taskIdParam]);
+  const selectedTaskId = taskIdParam || clickedTaskId;
 
   const handleCloseTaskPanel = () => {
-    setSelectedTaskId(null);
+    setClickedTaskId(null);
     setSearchParams(prev => {
       prev.delete('task');
       return prev;
@@ -202,9 +198,8 @@ export const WorkspaceView = () => {
           setWorkspace(wsRes.data);
           setSectionsTree(sectionsRes.data);
         } else {
-          // Fetch archive and ensure we have basic workspace data
           const [wsRes, archiveRes] = await Promise.all([
-            workspace ? { data: workspace } : apiClient.get(`/workspaces/${workspaceId}`),
+            apiClient.get(`/workspaces/${workspaceId}`),
             apiClient.get(`/workspaces/${workspaceId}/archive`)
           ]);
           setWorkspace(wsRes.data);
@@ -310,7 +305,7 @@ export const WorkspaceView = () => {
                       key={section.id} 
                       section={section} 
                       onOpenTask={(taskId) => {
-                        setSelectedTaskId(taskId);
+                        setClickedTaskId(taskId);
                         setSearchParams(prev => { prev.set('task', taskId); return prev; });
                       }}
                       filters={activeFilters}
@@ -339,7 +334,7 @@ export const WorkspaceView = () => {
                   key={task.id} 
                   task={task} 
                   onClick={() => {
-                    setSelectedTaskId(task.id);
+                    setClickedTaskId(task.id);
                     setSearchParams(prev => { prev.set('task', task.id); return prev; });
                   }}
                   onUpdate={(id, updates) => {
@@ -359,7 +354,7 @@ export const WorkspaceView = () => {
           <TaskDetailPanel 
             taskId={selectedTaskId} 
             onClose={handleCloseTaskPanel}
-            onTaskUpdated={(id, updates) => {
+            onTaskUpdated={() => {
               // Trigger a refetch or partial update to keep view fresh
               if (viewMode === 'archived') {
                 apiClient.get(`/workspaces/${workspaceId}/archive`).then(res => setArchivedTasks(res.data));

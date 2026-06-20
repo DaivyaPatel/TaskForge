@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { User, Mail, Camera, Lock, Trash2, Loader2, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import apiClient from '../../api/client';
 import { useAuthStore } from '../../store/authStore';
@@ -28,15 +28,6 @@ export const ProfileSettings = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deletePassword, setDeletePassword] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
-
-  // Sync state if user context updates slowly
-  useEffect(() => {
-    if (user) {
-      setDisplayName(user.displayName);
-      setEmail(user.email);
-      setAvatarPreview(user.avatarUrl);
-    }
-  }, [user]);
 
   // --- Handlers ---
   const handleAvatarChange = (e) => {

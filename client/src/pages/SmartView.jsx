@@ -16,14 +16,11 @@ export const SmartView = () => {
   
   const [selectedTaskId, setSelectedTaskId] = useState(null);
 
-  // If the user types a bad URL like /smart/pizza, redirect them
-  // If the user types a bad URL like /smart/pizza, redirect them
-  if (view !== 'today' && view !== 'upcoming') {
-    return <Navigate to="/dashboard" replace />;
-  }
+  const isValidView = view === 'today' || view === 'upcoming';
 
   // Fetch tasks when the view changes
   useEffect(() => {
+    if (!isValidView) return;
     const fetchSmartTasks = async () => {
       setIsLoading(true);
       setError(null);
@@ -39,7 +36,7 @@ export const SmartView = () => {
     };
     
     fetchSmartTasks();
-  }, [view]);
+  }, [view, isValidView]);
 
   // Group tasks by workspace using useMemo for performance
   const groupedTasks = useMemo(() => {
@@ -57,6 +54,10 @@ export const SmartView = () => {
       return groups;
     }, {});
   }, [tasks]);
+
+  if (!isValidView) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   if (isLoading) {
     return (
